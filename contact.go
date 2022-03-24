@@ -4,7 +4,7 @@
 package cubez
 
 import (
-	m "github.com/tbogdala/cubez/math"
+	m "github.com/harbdog/cubez/math"
 )
 
 // a few internal epsilon values

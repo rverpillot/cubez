@@ -7,9 +7,9 @@ import (
 	gl "github.com/go-gl/gl/v3.3-core/gl"
 	glfw "github.com/go-gl/glfw/v3.1/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
-	"github.com/tbogdala/cubez"
-	ex "github.com/tbogdala/cubez/examples"
-	m "github.com/tbogdala/cubez/math"
+	"github.com/harbdog/cubez"
+	ex "github.com/harbdog/cubez/examples"
+	m "github.com/harbdog/cubez/math"
 )
 
 const (

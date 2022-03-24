@@ -6,7 +6,7 @@ package cubez
 import (
 	"math"
 
-	m "github.com/tbogdala/cubez/math"
+	m "github.com/harbdog/cubez/math"
 )
 
 const (

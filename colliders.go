@@ -4,7 +4,7 @@
 package cubez
 
 import (
-	m "github.com/tbogdala/cubez/math"
+	m "github.com/harbdog/cubez/math"
 )
 
 // Collider is an interface for collision primitive objects to make calculating collisions

@@ -1,12 +1,10 @@
-Cubez v0.1.0
-============
+# Cubez
 
 Cubez is a 3d physics library written in the [Go][golang] programming language. It is
  mostly a port of [cyclone-physics][cyclone] by Ian Millington and using his book
 "Game Physics Engine Design" as a reference.
 
-Current Features
-----------------
+## Current Features
 
 * Full 3d rigid body real-time physics simulation suitable for games; meaning
   both linear velocity as well as angular velocity are calculated.
@@ -14,8 +12,7 @@ Current Features
 * Primitives supported: planes, spheres, cubes.
 * Math library defaults to 64-bit floats but can easily be tuned down to 32-bit.
 
-Examples
---------
+## Examples
 
 Ballistic: shoot spheres at a cube by pressing the space bar.
 
@@ -25,8 +22,7 @@ Cubedrop: hit the space bar to drop some cubes onto the ground
 
 ![cubedrop][cubedrop_ss]
 
-OS Support
-----------
+## OS Support
 
 Cubez is known to work on the following:
 
@@ -38,8 +34,7 @@ there is an acceptable Go x64 and gcc x64 compiler set available.
 
 Support for 32-bit systems is untested.
 
-Dependencies
-------------
+## Dependencies
 
 The only dependency on the core `cubez` package is the math package included in `cubez`.
 
@@ -50,65 +45,42 @@ libraries. Your system will also need to be OpenGL 3.3 capable.
 The examples use a basic OpenGL *framework-in-a-file* inspired by my graphics engine
 called [fizzle][fizzle]. This way the full [fizzle][fizzle] library is not a dependency.
 
-Installation
-------------
+## Installation
 
-If you don't have the dependencies for the examples and wish to install them,
-you can do so with the following commands:
+Clone or download this project, then go to the examples directory and download the dependencies.
 
 ```bash
-go get github.com/go-gl/gl/v3.3-core/gl
-go get github.com/go-gl/mathgl/mgl32
-go get github.com/go-gl/glfw/v3.1/glfw
+cd cubez/examples
+go mod download
 ```
 
-The library itself can be installed with the following command:
+Each example can then be run from its folder within `examples`:
 
 ```bash
-go get github.com/tbogdala/cubez
+cd cubez/examples/ballistic
+go run ballistic.go
 ```
-
-To build the examples, run the following in a shell:
 
 ```bash
- cd $GOPATH/src/github.com/tbogdala/cubez/examples
-./build.sh
+cd cubez/examples/cubedrop
+go run cubedrop.go
 ```
 
-Documentation
--------------
+## Documentation
 
 Currently, you'll have to use godoc to read the API documentation and check
 out the examples to figure out how to use the library.
 
 
-Known Limitations
------------------
+## Known Limitations
 
 * slim down the public interface to the library to only export what's needed
 * introduce a way to set the restitution and friction for contacts
 
 
-Roadmap
--------
-
-* more benchmarks
-* unit tests for collisions
-* more collision primitives
-* include some coarse collision detection to ease the O(n^2) pain with
-  resolving contacts in one big slice
-
-License
--------
+## License
 
 Cubez is released under the BSD license. See the [LICENSE][license-link] file for more details.
-
-
-Release History
----------------
-
-No tagged releases yet.
-
 
 
 [golang]: https://golang.org/
