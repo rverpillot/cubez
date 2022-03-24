@@ -1,7 +1,7 @@
 // Copyright 2015, Timothy Bogdala <tdb@animal-machine.com>
 // See the LICENSE file for more details.
 
-package main
+package examples
 
 import (
 	"errors"
@@ -526,13 +526,13 @@ func LoadShaderProgram(vertShader, fragShader string) (uint32, error) {
 func loadFile(filePath string) (rgba_flipped *image.NRGBA, e error) {
 	imgFile, err := os.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open the texture file: %v\n", err)
+		return nil, fmt.Errorf("failed to open the texture file: %v", err)
 	}
 
 	img, err := png.Decode(imgFile)
 	imgFile.Close()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to decode the texture: %v\n", err)
+		return nil, fmt.Errorf("failed to decode the texture: %v", err)
 	}
 
 	// if the source image doesn't have alpha, set it manually

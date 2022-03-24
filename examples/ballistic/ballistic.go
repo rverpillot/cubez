@@ -8,19 +8,20 @@ import (
 	glfw "github.com/go-gl/glfw/v3.1/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"github.com/tbogdala/cubez"
+	ex "github.com/tbogdala/cubez/examples"
 	m "github.com/tbogdala/cubez/math"
 )
 
 var (
-	app *ExampleApp
+	app *ex.ExampleApp
 
-	cube      *Entity
-	backboard *Entity
-	bullets   []*Entity
+	cube      *ex.Entity
+	backboard *ex.Entity
+	bullets   []*ex.Entity
 
 	colorShader uint32
 	groundPlane *cubez.CollisionPlane
-	ground      *Renderable
+	ground      *ex.Renderable
 )
 
 // update object locations
@@ -31,15 +32,15 @@ func updateObjects(delta float64) {
 	cube.Collider.CalculateDerivedData()
 
 	// for now we hack in the position and rotation of the collider into the renderable
-	SetGlVector3(&cube.Node.Location, &body.Position)
-	SetGlQuat(&cube.Node.LocalRotation, &body.Orientation)
+	ex.SetGlVector3(&cube.Node.Location, &body.Position)
+	ex.SetGlQuat(&cube.Node.LocalRotation, &body.Orientation)
 
 	for _, bullet := range bullets {
 		bulletBody := bullet.Collider.GetBody()
 		bulletBody.Integrate(m.Real(delta))
 		bullet.Collider.CalculateDerivedData()
-		SetGlVector3(&bullet.Node.Location, &bulletBody.Position)
-		SetGlQuat(&bullet.Node.LocalRotation, &bulletBody.Orientation)
+		ex.SetGlVector3(&bullet.Node.Location, &bulletBody.Position)
+		ex.SetGlQuat(&bullet.Node.LocalRotation, &bulletBody.Orientation)
 	}
 }
 
@@ -132,7 +133,7 @@ func renderCallback(delta float64) {
 }
 
 func main() {
-	app = NewApp()
+	app = ex.NewApp()
 	app.InitGraphics("Ballistic", 800, 600)
 	app.SetKeyCallback(keyCallback)
 	app.OnRender = renderCallback
@@ -141,7 +142,7 @@ func main() {
 
 	// compile the shaders
 	var err error
-	colorShader, err = LoadShaderProgram(DiffuseColorVertShader, DiffuseColorFragShader)
+	colorShader, err = ex.LoadShaderProgram(ex.DiffuseColorVertShader, ex.DiffuseColorFragShader)
 	if err != nil {
 		panic("Failed to compile the shader! " + err.Error())
 	}
@@ -150,12 +151,12 @@ func main() {
 	groundPlane = cubez.NewCollisionPlane(m.Vector3{0.0, 1.0, 0.0}, 0.0)
 
 	// make a ground plane to draw
-	ground = CreatePlaneXZ(-500.0, 500.0, 500.0, -500.0, 1.0)
+	ground = ex.CreatePlaneXZ(-500.0, 500.0, 500.0, -500.0, 1.0)
 	ground.Shader = colorShader
 	ground.Color = mgl.Vec4{0.6, 0.6, 0.6, 1.0}
 
 	// create a test cube to render
-	cubeNode := CreateCube(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0)
+	cubeNode := ex.CreateCube(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0)
 	cubeNode.Shader = colorShader
 	cubeNode.Color = mgl.Vec4{1.0, 0.0, 0.0, 1.0}
 
@@ -171,13 +172,13 @@ func main() {
 	cubeCollider.CalculateDerivedData()
 
 	// make the entity out of the renerable and collider
-	cube = NewEntity(cubeNode, cubeCollider)
+	cube = ex.NewEntity(cubeNode, cubeCollider)
 
 	// make a slice of entities for bullets
-	bullets = make([]*Entity, 0, 16)
+	bullets = make([]*ex.Entity, 0, 16)
 
 	// make the backboard to bound the bullets off of
-	backboardNode := CreateCube(-0.5, -2.0, -0.25, 0.5, 2.0, 0.25)
+	backboardNode := ex.CreateCube(-0.5, -2.0, -0.25, 0.5, 2.0, 0.25)
 	backboardNode.Shader = colorShader
 	backboardNode.Color = mgl.Vec4{0.25, 0.2, 0.2, 1.0}
 	backboardCollider := cubez.NewCollisionCube(nil, m.Vector3{0.5, 2.0, 0.25})
@@ -185,10 +186,10 @@ func main() {
 	backboardCollider.Body.SetInfiniteMass()
 	backboardCollider.Body.CalculateDerivedData()
 	backboardCollider.CalculateDerivedData()
-	SetGlVector3(&backboardNode.Location, &backboardCollider.Body.Position)
+	ex.SetGlVector3(&backboardNode.Location, &backboardCollider.Body.Position)
 
 	// make the backboard entity
-	backboard = NewEntity(backboardNode, backboardCollider)
+	backboard = ex.NewEntity(backboardNode, backboardCollider)
 
 	// setup the camera
 	app.CameraPos = mgl.Vec3{-3.0, 3.0, 15.0}
@@ -206,7 +207,7 @@ func fire() {
 	var radius m.Real = 0.2
 
 	// create a test sphere to render
-	bullet := CreateSphere(float32(radius), 16, 16)
+	bullet := ex.CreateSphere(float32(radius), 16, 16)
 	bullet.Shader = colorShader
 	bullet.Color = mgl.Vec4{0.2, 0.2, 1.0, 1.0}
 
@@ -226,7 +227,7 @@ func fire() {
 	bulletCollider.Body.CalculateDerivedData()
 	bulletCollider.CalculateDerivedData()
 
-	e := NewEntity(bullet, bulletCollider)
+	e := ex.NewEntity(bullet, bulletCollider)
 	bullets = append(bullets, e)
 }
 

@@ -8,6 +8,7 @@ import (
 	glfw "github.com/go-gl/glfw/v3.1/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
 	"github.com/tbogdala/cubez"
+	ex "github.com/tbogdala/cubez/examples"
 	m "github.com/tbogdala/cubez/math"
 )
 
@@ -18,10 +19,10 @@ const (
 
 var (
 	diffuseShader uint32
-	app           *ExampleApp
-	cubes         []*Entity
+	app           *ex.ExampleApp
+	cubes         []*ex.Entity
 	groundPlane   *cubez.CollisionPlane
-	ground        *Renderable
+	ground        *ex.Renderable
 	crateTexture  uint32
 )
 
@@ -33,8 +34,8 @@ func updateObjects(delta float64) {
 		cube.Collider.CalculateDerivedData()
 
 		// for now we hack in the position and rotation of the collider into the renderable
-		SetGlVector3(&cube.Node.Location, &body.Position)
-		SetGlQuat(&cube.Node.LocalRotation, &body.Orientation)
+		ex.SetGlVector3(&cube.Node.Location, &body.Position)
+		ex.SetGlQuat(&cube.Node.LocalRotation, &body.Orientation)
 	}
 }
 
@@ -94,7 +95,7 @@ func renderCallback(delta float64) {
 }
 
 func main() {
-	app = NewApp()
+	app = ex.NewApp()
 	app.InitGraphics("Cube Drop", 800, 600)
 	app.SetKeyCallback(keyCallback)
 	app.OnRender = renderCallback
@@ -103,22 +104,22 @@ func main() {
 
 	// compile the shaders
 	var err error
-	diffuseShader, err = LoadShaderProgram(DiffuseTextureVertShader, DiffuseTextureFragShader)
+	diffuseShader, err = ex.LoadShaderProgram(ex.DiffuseTextureVertShader, ex.DiffuseTextureFragShader)
 	if err != nil {
 		panic("Failed to compile the diffuse shader! " + err.Error())
 	}
 
 	// setup the slice of cubes to render
-	cubes = make([]*Entity, 0, 128)
+	cubes = make([]*ex.Entity, 0, 128)
 
 	// load the grass texture for the ground
-	grassTex, err := LoadImageToTexture(grassTexturePath)
+	grassTex, err := ex.LoadImageToTexture(grassTexturePath)
 	if err != nil {
 		panic("Failed to load the grass texture! " + err.Error())
 	}
 
 	// load the crate texture for the cubes
-	crateTexture, err = LoadImageToTexture(crateTexturePath)
+	crateTexture, err = ex.LoadImageToTexture(crateTexturePath)
 	if err != nil {
 		panic("Failed to load the crate texture! " + err.Error())
 	}
@@ -127,7 +128,7 @@ func main() {
 	groundPlane = cubez.NewCollisionPlane(m.Vector3{0.0, 1.0, 0.0}, 0.0)
 
 	// make a ground plane to draw
-	ground = CreatePlaneXZ(-500.0, 500.0, 500.0, -500.0, 64.0)
+	ground = ex.CreatePlaneXZ(-500.0, 500.0, 500.0, -500.0, 64.0)
 	ground.Shader = diffuseShader
 	ground.Color = mgl.Vec4{1.0, 1.0, 1.0, 1.0}
 	ground.Tex0 = grassTex
@@ -151,8 +152,8 @@ func fire() {
 	}
 
 	for i := 0; i < cubesToMake; i++ {
-		e := new(Entity)
-		e.Node = CreateCube(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)
+		e := new(ex.Entity)
+		e.Node = ex.CreateCube(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)
 		e.Node.Shader = diffuseShader
 		e.Node.Color = mgl.Vec4{1.0, 1.0, 1.0, 1.0}
 		e.Node.Location = mgl.Vec3{float32(i*2.0-cubesToMake/2) - 0.5 + offset, 10.0, 0.0}

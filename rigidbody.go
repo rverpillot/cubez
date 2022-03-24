@@ -4,8 +4,9 @@
 package cubez
 
 import (
-	m "github.com/tbogdala/cubez/math"
 	"math"
+
+	m "github.com/tbogdala/cubez/math"
 )
 
 const (
