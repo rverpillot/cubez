@@ -42,7 +42,7 @@ For the examples, you will need GLFW 3.1.x installed on your system, and you wil
 to install the go-gl project's [gl][gogl_gl], [glfw][gogl_glfw] and [mathgl][gogl_mgl]
 libraries. Your system will also need to be OpenGL 3.3 capable.
 
-The examples use a basic OpenGL *framework-in-a-file* inspired by my graphics engine
+The examples use a basic OpenGL *framework-in-a-file* inspired by [@tbogdala](https://github.com/tbogdala)'s graphics engine
 called [fizzle][fizzle]. This way the full [fizzle][fizzle] library is not a dependency.
 
 ## Installation
