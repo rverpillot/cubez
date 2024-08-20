@@ -19,7 +19,7 @@ type Collider interface {
 	GetTransform() m.Matrix3x4
 	CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
 	CheckAgainstSphere(sphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
-	CheckAgainstCube(secondCube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
+	CheckAgainstBox(secondBox *CollisionBox, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
 }
 
 // CollisionPlane represents a plane in space for collisions but doesn't
@@ -34,9 +34,9 @@ type CollisionPlane struct {
 	Offset m.Real
 }
 
-// CollisionCube is a rigid body that can be considered an axis-alligned cube
+// CollisionBox is a rigid body that can be considered an axis-alligned box
 // for contact collision.
-type CollisionCube struct {
+type CollisionBox struct {
 	// Body is the RigidBody that is represented by this collision object.
 	Body *RigidBody
 
@@ -48,7 +48,7 @@ type CollisionCube struct {
 	// NOTE: this is calculated by calling CalculateDerivedData().
 	transform m.Matrix3x4
 
-	// Halfsize holds the cube's half-sizes along each of its local axes.
+	// Halfsize holds the box's half-sizes along each of its local axes.
 	HalfSize m.Vector3
 }
 
@@ -118,10 +118,10 @@ func (p *CollisionPlane) CheckAgainstSphere(sphere *CollisionSphere, friction, r
 	return sphere.CheckAgainstHalfSpace(p, friction, restitution, existingContacts)
 }
 
-// CheckAgainstCube checks for collisions against a cube.
-func (p *CollisionPlane) CheckAgainstCube(cube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
-	// use the cube's implemtnation of the check
-	return cube.CheckAgainstHalfSpace(p, friction, restitution, existingContacts)
+// CheckAgainstBox checks for collisions against a box.
+func (p *CollisionPlane) CheckAgainstBox(box *CollisionBox, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
+	// use the box's implemtnation of the check
+	return box.CheckAgainstHalfSpace(p, friction, restitution, existingContacts)
 }
 
 /*
@@ -204,10 +204,10 @@ func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, friction,
 	return true, contacts
 }
 
-// CheckAgainstCube checks the sphere against collision with a cube.
-func (s *CollisionSphere) CheckAgainstCube(cube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
-	// use the cube's implementation of the check
-	return cube.CheckAgainstSphere(s, friction, restitution, existingContacts)
+// CheckAgainstBox checks the sphere against collision with a box.
+func (s *CollisionSphere) CheckAgainstBox(box *CollisionBox, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
+	// use the box's implementation of the check
+	return box.CheckAgainstSphere(s, friction, restitution, existingContacts)
 }
 
 // CheckAgainstSphere checks the sphere against collision with another sphere.
@@ -251,64 +251,64 @@ func (s *CollisionSphere) CheckAgainstSphere(secondSphere *CollisionSphere, fric
 
 /*
 ==================================================================================================
-  COLLISION CUBE
+  COLLISION BOX
 ==================================================================================================
 */
 
-// NewCollisionCube creates a new CollisionCube object with the dimensions specified
+// NewCollisionBox creates a new CollisionBox object with the dimensions specified
 // for a given RigidBody. If a RigidBody is not specified, then a new RigidBody
 // object is created for the new collider object.
-func NewCollisionCube(optBody *RigidBody, halfSize m.Vector3) *CollisionCube {
-	cube := new(CollisionCube)
-	cube.Offset.SetIdentity()
-	cube.HalfSize = halfSize
-	cube.Body = optBody
-	if cube.Body == nil {
-		cube.Body = NewRigidBody()
+func NewCollisionBox(optBody *RigidBody, halfSize m.Vector3) *CollisionBox {
+	box := new(CollisionBox)
+	box.Offset.SetIdentity()
+	box.HalfSize = halfSize
+	box.Body = optBody
+	if box.Body == nil {
+		box.Body = NewRigidBody()
 	}
-	return cube
+	return box
 }
 
-// Clone makes a new copy of the CollisionCube object
-func (cube *CollisionCube) Clone() Collider {
+// Clone makes a new copy of the CollisionBox object
+func (box *CollisionBox) Clone() Collider {
 	var bClone *RigidBody
-	if cube.Body != nil {
-		bClone = cube.Body.Clone()
+	if box.Body != nil {
+		bClone = box.Body.Clone()
 	}
-	newCube := NewCollisionCube(bClone, cube.HalfSize)
-	newCube.Offset = cube.Offset
-	newCube.transform = cube.transform
-	return newCube
+	newBox := NewCollisionBox(bClone, box.HalfSize)
+	newBox.Offset = box.Offset
+	newBox.transform = box.transform
+	return newBox
 }
 
 // GetTransform returns a copy of the transform matrix for the collider object.
-func (cube *CollisionCube) GetTransform() m.Matrix3x4 {
-	return cube.transform
+func (box *CollisionBox) GetTransform() m.Matrix3x4 {
+	return box.transform
 }
 
-// GetBody returns the rigid body associated with the cube.
-func (cube *CollisionCube) GetBody() *RigidBody {
-	return cube.Body
+// GetBody returns the rigid body associated with the box.
+func (box *CollisionBox) GetBody() *RigidBody {
+	return box.Body
 }
 
 // CalculateDerivedData internal data from public data members.
 //
 // Constructs a transform matrix based on the RigidBody's transform and the
 // collision object's offset.
-func (cube *CollisionCube) CalculateDerivedData() {
-	cube.transform = cube.Body.transform.MulMatrix3x4(&cube.Offset)
+func (box *CollisionBox) CalculateDerivedData() {
+	box.transform = box.Body.transform.MulMatrix3x4(&box.Offset)
 }
 
 // CheckAgainstHalfSpace does a collision test on a collision box and a plane representing
 // a half-space (i.e. the normal of the plane points out of the half-space).
-func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
+func (box *CollisionBox) CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// check for an intersection -- if there is none, then we can return
-	if !intersectCubeAndHalfSpace(cube, plane) {
+	if !intersectBoxAndHalfSpace(box, plane) {
 		return false, existingContacts
 	}
 
 	// Now that we have an intersection, find the points of intersection. This can be
-	// done by checking the eight vertices of the cube. If the cube is resting on a plane
+	// done by checking the eight vertices of the box. If the box is resting on a plane
 	// or and edge it will be reported as four or two contact points.
 
 	// setup an array of vertices
@@ -326,8 +326,8 @@ func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, friction
 	contacts := existingContacts
 	for _, v := range mults {
 		// calculate the position of the vertex
-		v.ComponentProduct(&cube.HalfSize)
-		vertexPos := cube.transform.MulVector3(&v)
+		v.ComponentProduct(&box.HalfSize)
+		vertexPos := box.transform.MulVector3(&v)
 
 		// calculate the distance from the plane
 		vertexDistance := vertexPos.Dot(&plane.Normal)
@@ -345,7 +345,7 @@ func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, friction
 			c.ContactPoint.Add(&vertexPos)
 			c.ContactNormal = plane.Normal
 			c.Penetration = plane.Offset - vertexDistance
-			c.Bodies[0] = cube.Body
+			c.Bodies[0] = box.Body
 			c.Bodies[1] = nil
 
 			contacts = append(contacts, c)
@@ -359,15 +359,15 @@ func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, friction
 	return contactDetected, contacts
 }
 
-// CheckAgainstSphere checks the cube against a sphere to see if there's a collision.
-func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
-	// transform the center of the sphere into cube coordinates
+// CheckAgainstSphere checks the box against a sphere to see if there's a collision.
+func (box *CollisionBox) CheckAgainstSphere(sphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
+	// transform the center of the sphere into box coordinates
 	position := sphere.transform.GetAxis(3)
-	relCenter := cube.transform.TransformInverse(&position)
+	relCenter := box.transform.TransformInverse(&position)
 	// check to see if we can exclude contact
-	if m.RealAbs(relCenter[0])-sphere.Radius > cube.HalfSize[0] ||
-		m.RealAbs(relCenter[1])-sphere.Radius > cube.HalfSize[1] ||
-		m.RealAbs(relCenter[2])-sphere.Radius > cube.HalfSize[2] {
+	if m.RealAbs(relCenter[0])-sphere.Radius > box.HalfSize[0] ||
+		m.RealAbs(relCenter[1])-sphere.Radius > box.HalfSize[1] ||
+		m.RealAbs(relCenter[2])-sphere.Radius > box.HalfSize[2] {
 		return false, existingContacts
 	}
 
@@ -376,10 +376,10 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction,
 	// clamp the coordinates to the box
 	for i := 0; i < 3; i++ {
 		dist := relCenter[i]
-		if dist > cube.HalfSize[i] {
-			dist = cube.HalfSize[i]
-		} else if dist < -cube.HalfSize[i] {
-			dist = -cube.HalfSize[i]
+		if dist > box.HalfSize[i] {
+			dist = box.HalfSize[i]
+		} else if dist < -box.HalfSize[i] {
+			dist = -box.HalfSize[i]
 		}
 		closestPoint[i] = dist
 	}
@@ -393,7 +393,7 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction,
 	}
 
 	// transform the contact point
-	closestPointWorld := cube.transform.MulVector3(&closestPoint)
+	closestPointWorld := box.transform.MulVector3(&closestPoint)
 
 	// we have contact
 	c := newContact()
@@ -403,7 +403,7 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction,
 
 	// if the sphere is small enough, or the engine doesn't process fast enough,
 	// you can end up having a relCenter position that's the same as closestPoint --
-	// meaning that closestPoint didn't need to be clamped to cube bounds.
+	// meaning that closestPoint didn't need to be clamped to box bounds.
 	//
 	// since closestPoint is relCenter at this point, transforming it back to
 	// world coordinates makes it equal to the sphere position which will not
@@ -421,7 +421,7 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction,
 	} else {
 		c.Penetration = 0.0
 	}
-	c.Bodies[0] = cube.Body
+	c.Bodies[0] = box.Body
 	c.Bodies[1] = sphere.Body
 
 	contacts := append(existingContacts, c)
@@ -434,7 +434,7 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction,
 
 // penetrationOnAxis checks if the two boxes overlap along a given axis and
 // returns the amount of overlap.
-func penetrationOnAxis(one *CollisionCube, two *CollisionCube, axis *m.Vector3, toCenter *m.Vector3) m.Real {
+func penetrationOnAxis(one *CollisionBox, two *CollisionBox, axis *m.Vector3, toCenter *m.Vector3) m.Real {
 	// project the half-size of one onto axis
 	oneProject := transformToAxis(one, axis)
 	twoProject := transformToAxis(two, axis)
@@ -447,7 +447,7 @@ func penetrationOnAxis(one *CollisionCube, two *CollisionCube, axis *m.Vector3, 
 	return oneProject + twoProject - distance
 }
 
-func tryAxis(one *CollisionCube, two *CollisionCube, axis m.Vector3, toCenter *m.Vector3,
+func tryAxis(one *CollisionBox, two *CollisionBox, axis m.Vector3, toCenter *m.Vector3,
 	index int, smallestPenetration m.Real, smallestCase int) (bool, m.Real, int) {
 	// make sure we have a normalized axis, and don't check almost parallel axes
 	if axis.SquareMagnitude() < m.Epsilon {
@@ -470,7 +470,7 @@ func tryAxis(one *CollisionCube, two *CollisionCube, axis m.Vector3, toCenter *m
 
 // fillPointFaceBoxBox is called when we know that a vertex from
 // box two is in contact with box one.
-func fillPointFaceBoxBox(one *CollisionCube, two *CollisionCube, toCenter *m.Vector3,
+func fillPointFaceBoxBox(one *CollisionBox, two *CollisionBox, toCenter *m.Vector3,
 	best int, pen m.Real, existingContacts []*Contact) []*Contact {
 	// We know which axis the collision is on (i.e. best),
 	// but we need to work out which of the two faces on this axis.
@@ -564,11 +564,11 @@ func contactPoint(pOne *m.Vector3, dOne *m.Vector3, oneSize m.Real,
 	return cOne
 }
 
-// CheckAgainstCube checks for collisions against another cube.
-func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
+// CheckAgainstBox checks for collisions against another box.
+func (box *CollisionBox) CheckAgainstBox(secondBox *CollisionBox, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// find the vector between two vectors
-	toCenter := secondCube.transform.GetAxis(3)
-	oneAxis3 := cube.transform.GetAxis(3)
+	toCenter := secondBox.transform.GetAxis(3)
+	oneAxis3 := box.transform.GetAxis(3)
 	toCenter.Sub(&oneAxis3)
 
 	var ret bool
@@ -578,13 +578,13 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 	// Now we check each axis, returning if it gives a separating axis.
 	// Keep track of the smallest penetration axis.
 	for i := 0; i <= 2; i++ {
-		ret, pen, best = tryAxis(cube, secondCube, cube.transform.GetAxis(i), &toCenter, i, pen, best)
+		ret, pen, best = tryAxis(box, secondBox, box.transform.GetAxis(i), &toCenter, i, pen, best)
 		if !ret {
 			return false, existingContacts
 		}
 	}
 	for i := 0; i <= 2; i++ {
-		ret, pen, best = tryAxis(cube, secondCube, secondCube.transform.GetAxis(i), &toCenter, i+3, pen, best)
+		ret, pen, best = tryAxis(box, secondBox, secondBox.transform.GetAxis(i), &toCenter, i+3, pen, best)
 		if !ret {
 			return false, existingContacts
 		}
@@ -594,24 +594,24 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 	bestSingleAxis := best
 
 	for i := 0; i <= 2; i++ {
-		a1 := cube.transform.GetAxis(i)
-		a2 := secondCube.transform.GetAxis(0)
+		a1 := box.transform.GetAxis(i)
+		a2 := secondBox.transform.GetAxis(0)
 		cross := a1.Cross(&a2)
-		ret, pen, best = tryAxis(cube, secondCube, cross, &toCenter, (i*3)+6, pen, best)
+		ret, pen, best = tryAxis(box, secondBox, cross, &toCenter, (i*3)+6, pen, best)
 		if !ret {
 			return false, existingContacts
 		}
-		a1 = cube.transform.GetAxis(i)
-		a2 = secondCube.transform.GetAxis(1)
+		a1 = box.transform.GetAxis(i)
+		a2 = secondBox.transform.GetAxis(1)
 		cross = a1.Cross(&a2)
-		ret, pen, best = tryAxis(cube, secondCube, cross, &toCenter, (i*3)+7, pen, best)
+		ret, pen, best = tryAxis(box, secondBox, cross, &toCenter, (i*3)+7, pen, best)
 		if !ret {
 			return false, existingContacts
 		}
-		a1 = cube.transform.GetAxis(i)
-		a2 = secondCube.transform.GetAxis(2)
+		a1 = box.transform.GetAxis(i)
+		a2 = secondBox.transform.GetAxis(2)
 		cross = a1.Cross(&a2)
-		ret, pen, best = tryAxis(cube, secondCube, cross, &toCenter, (i*3)+8, pen, best)
+		ret, pen, best = tryAxis(box, secondBox, cross, &toCenter, (i*3)+8, pen, best)
 		if !ret {
 			return false, existingContacts
 		}
@@ -622,7 +622,7 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 	// depending on the case.
 	if best < 3 {
 		// We've got a vertex of box two on a face of box one.
-		return true, fillPointFaceBoxBox(cube, secondCube, &toCenter, best, pen, existingContacts)
+		return true, fillPointFaceBoxBox(box, secondBox, &toCenter, best, pen, existingContacts)
 	} else if best < 6 {
 		// We've got a vertex of box one on a face of box two.
 		// We use the same algorithm as above, but swap around
@@ -630,14 +630,14 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 		// centres).
 		newCenter := toCenter
 		newCenter.MulWith(-1.0)
-		return true, fillPointFaceBoxBox(secondCube, cube, &newCenter, best-3, pen, existingContacts)
+		return true, fillPointFaceBoxBox(secondBox, box, &newCenter, best-3, pen, existingContacts)
 	} else {
 		// We've got an edge-edge contact. Find out which axes
 		best -= 6
 		oneAxisIndex := best / 3
 		twoAxisIndex := best % 3
-		oneAxis := cube.transform.GetAxis(oneAxisIndex)
-		twoAxis := secondCube.transform.GetAxis(twoAxisIndex)
+		oneAxis := box.transform.GetAxis(oneAxisIndex)
+		twoAxis := secondBox.transform.GetAxis(twoAxisIndex)
 		axis := oneAxis.Cross(&twoAxis)
 		axis.Normalize()
 
@@ -652,26 +652,26 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 		// its component in the direction of the box's collision axis is zero
 		// (its a mid-point) and we determine which of the extremes in each
 		// of the other axes is closest.
-		ptOnOneEdge := cube.HalfSize
-		ptOnTwoEdge := secondCube.HalfSize
+		ptOnOneEdge := box.HalfSize
+		ptOnTwoEdge := secondBox.HalfSize
 		for i := 0; i < 3; i++ {
 			if i == oneAxisIndex {
 				ptOnOneEdge[i] = 0
-			} else if oneAxis := cube.transform.GetAxis(i); oneAxis.Dot(&axis) > 0 {
+			} else if oneAxis := box.transform.GetAxis(i); oneAxis.Dot(&axis) > 0 {
 				ptOnOneEdge[i] = -ptOnOneEdge[i]
 			}
 
 			if i == twoAxisIndex {
 				ptOnTwoEdge[i] = 0
-			} else if twoAxis := secondCube.transform.GetAxis(i); twoAxis.Dot(&axis) < 0 {
+			} else if twoAxis := secondBox.transform.GetAxis(i); twoAxis.Dot(&axis) < 0 {
 				ptOnTwoEdge[i] = -ptOnTwoEdge[i]
 			}
 		}
 
 		// Move them into world coordinates (they are already oriented
 		// correctly, since they have been derived from the axes).
-		ptOnOneEdge = cube.transform.MulVector3(&ptOnOneEdge)
-		ptOnTwoEdge = secondCube.transform.MulVector3(&ptOnTwoEdge)
+		ptOnOneEdge = box.transform.MulVector3(&ptOnOneEdge)
+		ptOnTwoEdge = secondBox.transform.MulVector3(&ptOnTwoEdge)
 
 		// So we have a point and a direction for the colliding edges.
 		// We need to find out point of closest approach of the two
@@ -680,16 +680,16 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 		if bestSingleAxis > 2 {
 			useOne = true
 		}
-		contactVertex := contactPoint(&ptOnOneEdge, &oneAxis, cube.HalfSize[oneAxisIndex],
-			&ptOnTwoEdge, &twoAxis, secondCube.HalfSize[twoAxisIndex], useOne)
+		contactVertex := contactPoint(&ptOnOneEdge, &oneAxis, box.HalfSize[oneAxisIndex],
+			&ptOnTwoEdge, &twoAxis, secondBox.HalfSize[twoAxisIndex], useOne)
 
 		// finally ... create a new contact
 		c := newContact()
 		c.ContactNormal = axis
 		c.Penetration = pen
 		c.ContactPoint = contactVertex
-		c.Bodies[0] = cube.Body
-		c.Bodies[1] = secondCube.Body
+		c.Bodies[0] = box.Body
+		c.Bodies[1] = secondBox.Body
 
 		c.Friction = friction
 		c.Restitution = restitution
@@ -712,8 +712,8 @@ func CheckForCollisions(one Collider, two Collider, friction, restitution m.Real
 	case *CollisionSphere:
 		return one.CheckAgainstSphere(t, friction, restitution, existingContacts)
 
-	case *CollisionCube:
-		return one.CheckAgainstCube(t, friction, restitution, existingContacts)
+	case *CollisionBox:
+		return one.CheckAgainstBox(t, friction, restitution, existingContacts)
 
 	case *CollisionPlane:
 		return one.CheckAgainstHalfSpace(t, friction, restitution, existingContacts)
@@ -724,25 +724,25 @@ func CheckForCollisions(one Collider, two Collider, friction, restitution m.Real
 	return false, existingContacts
 }
 
-// intersectCubeAndHalfSpace tests to see if a cube and plane intersect
-func intersectCubeAndHalfSpace(cube *CollisionCube, plane *CollisionPlane) bool {
-	// work out the projected radius of the cube onto the plane normal
-	projectedRadius := transformToAxis(cube, &plane.Normal)
+// intersectBoxAndHalfSpace tests to see if a box and plane intersect
+func intersectBoxAndHalfSpace(box *CollisionBox, plane *CollisionPlane) bool {
+	// work out the projected radius of the box onto the plane normal
+	projectedRadius := transformToAxis(box, &plane.Normal)
 
 	// work out how far the box is from the origin
-	axis := cube.transform.GetAxis(3)
-	cubeDistance := plane.Normal.Dot(&axis) - projectedRadius
+	axis := box.transform.GetAxis(3)
+	boxDistance := plane.Normal.Dot(&axis) - projectedRadius
 
 	// check for intersection
-	return cubeDistance <= plane.Offset
+	return boxDistance <= plane.Offset
 }
 
-func transformToAxis(cube *CollisionCube, axis *m.Vector3) m.Real {
-	cubeAxisX := cube.transform.GetAxis(0)
-	cubeAxisY := cube.transform.GetAxis(1)
-	cubeAxisZ := cube.transform.GetAxis(2)
+func transformToAxis(box *CollisionBox, axis *m.Vector3) m.Real {
+	boxAxisX := box.transform.GetAxis(0)
+	boxAxisY := box.transform.GetAxis(1)
+	boxAxisZ := box.transform.GetAxis(2)
 
-	return cube.HalfSize[0]*m.RealAbs(axis.Dot(&cubeAxisX)) +
-		cube.HalfSize[1]*m.RealAbs(axis.Dot(&cubeAxisY)) +
-		cube.HalfSize[2]*m.RealAbs(axis.Dot(&cubeAxisZ))
+	return box.HalfSize[0]*m.RealAbs(axis.Dot(&boxAxisX)) +
+		box.HalfSize[1]*m.RealAbs(axis.Dot(&boxAxisY)) +
+		box.HalfSize[2]*m.RealAbs(axis.Dot(&boxAxisZ))
 }

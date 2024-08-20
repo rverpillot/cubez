@@ -160,7 +160,7 @@ func fire() {
 		e.Node.Tex0 = crateTexture
 
 		// create the collision box for the the cube
-		cubeCollider := cubez.NewCollisionCube(nil, m.Vector3{0.5, 0.5, 0.5})
+		cubeCollider := cubez.NewCollisionBox(nil, m.Vector3{0.5, 0.5, 0.5})
 		cubeCollider.Body.Position = m.Vector3{m.Real(i*2.0-cubesToMake/2) - 0.5 + m.Real(offset), 10.0, 0.0}
 		cubeCollider.Body.SetMass(8.0)
 		cubeCollider.Body.CanSleep = true

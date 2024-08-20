@@ -163,7 +163,7 @@ func main() {
 	// create the collision box for the the cube
 	var cubeMass m.Real = 8.0
 	var cubeInertia m.Matrix3
-	cubeCollider := cubez.NewCollisionCube(nil, m.Vector3{1.0, 1.0, 1.0})
+	cubeCollider := cubez.NewCollisionBox(nil, m.Vector3{1.0, 1.0, 1.0})
 	cubeCollider.Body.Position = m.Vector3{0.0, 5.0, 0.0}
 	cubeCollider.Body.SetMass(cubeMass)
 	cubeInertia.SetBlockInertiaTensor(&cubeCollider.HalfSize, cubeMass)
@@ -181,7 +181,7 @@ func main() {
 	backboardNode := ex.CreateCube(-0.5, -2.0, -0.25, 0.5, 2.0, 0.25)
 	backboardNode.Shader = colorShader
 	backboardNode.Color = mgl.Vec4{0.25, 0.2, 0.2, 1.0}
-	backboardCollider := cubez.NewCollisionCube(nil, m.Vector3{0.5, 2.0, 0.25})
+	backboardCollider := cubez.NewCollisionBox(nil, m.Vector3{0.5, 2.0, 0.25})
 	backboardCollider.Body.Position = m.Vector3{0.0, 2.0, -10.0}
 	backboardCollider.Body.SetInfiniteMass()
 	backboardCollider.Body.CalculateDerivedData()
