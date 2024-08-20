@@ -4,7 +4,7 @@
 package cubez
 
 import (
-	m "github.com/harbdog/cubez/math"
+	m "github.com/rverpillot/cubez/math"
 )
 
 // a few internal epsilon values
@@ -50,8 +50,8 @@ type Contact struct {
 	desiredDeltaVelocity m.Real
 }
 
-// NewContact returns a new Contact object.
-func NewContact() *Contact {
+// newContact returns a new Contact object.
+func newContact() *Contact {
 	c := new(Contact)
 	return c
 }

@@ -6,7 +6,7 @@ package cubez
 import (
 	"math"
 
-	m "github.com/harbdog/cubez/math"
+	m "github.com/rverpillot/cubez/math"
 )
 
 const (
@@ -265,7 +265,8 @@ func (body *RigidBody) Integrate(duration m.Real) {
 // directly by client code; it is called automatically during integration.
 //
 // Particularly, call this after modifying:
-//   Position, Orientation
+//
+//	Position, Orientation
 func (body *RigidBody) CalculateDerivedData() {
 	body.Orientation.Normalize()
 	body.transform.SetAsTransform(&body.Position, &body.Orientation)

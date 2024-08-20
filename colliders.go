@@ -4,7 +4,7 @@
 package cubez
 
 import (
-	m "github.com/harbdog/cubez/math"
+	m "github.com/rverpillot/cubez/math"
 )
 
 // Collider is an interface for collision primitive objects to make calculating collisions
@@ -17,9 +17,9 @@ type Collider interface {
 	CalculateDerivedData()
 	GetBody() *RigidBody
 	GetTransform() m.Matrix3x4
-	CheckAgainstHalfSpace(plane *CollisionPlane, existingContacts []*Contact) (bool, []*Contact)
-	CheckAgainstSphere(sphere *CollisionSphere, existingContacts []*Contact) (bool, []*Contact)
-	CheckAgainstCube(secondCube *CollisionCube, existingContacts []*Contact) (bool, []*Contact)
+	CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
+	CheckAgainstSphere(sphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
+	CheckAgainstCube(secondCube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact)
 }
 
 // CollisionPlane represents a plane in space for collisions but doesn't
@@ -108,20 +108,20 @@ func (p *CollisionPlane) GetBody() *RigidBody {
 }
 
 // CheckAgainstHalfSpace doesn't return collisions against another plane, so this implementation is empty.
-func (p *CollisionPlane) CheckAgainstHalfSpace(plane *CollisionPlane, existingContacts []*Contact) (bool, []*Contact) {
+func (p *CollisionPlane) CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	return false, existingContacts
 }
 
 // CheckAgainstSphere checks for collisions against a sphere.
-func (p *CollisionPlane) CheckAgainstSphere(sphere *CollisionSphere, existingContacts []*Contact) (bool, []*Contact) {
+func (p *CollisionPlane) CheckAgainstSphere(sphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// use the sphere's implementation of the check
-	return sphere.CheckAgainstHalfSpace(p, existingContacts)
+	return sphere.CheckAgainstHalfSpace(p, friction, restitution, existingContacts)
 }
 
 // CheckAgainstCube checks for collisions against a cube.
-func (p *CollisionPlane) CheckAgainstCube(cube *CollisionCube, existingContacts []*Contact) (bool, []*Contact) {
+func (p *CollisionPlane) CheckAgainstCube(cube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// use the cube's implemtnation of the check
-	return cube.CheckAgainstHalfSpace(p, existingContacts)
+	return cube.CheckAgainstHalfSpace(p, friction, restitution, existingContacts)
 }
 
 /*
@@ -177,7 +177,7 @@ func (s *CollisionSphere) CalculateDerivedData() {
 
 // CheckAgainstHalfSpace does a collision test on a collision sphere and a plane representing
 // a half-space (i.e. the normal of the plane points out of the half-space).
-func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, existingContacts []*Contact) (bool, []*Contact) {
+func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// work out the distance from the origin
 	positionAxis := s.transform.GetAxis(3)
 	distance := plane.Normal.Dot(&positionAxis) - s.Radius
@@ -187,7 +187,7 @@ func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, existingC
 		return false, existingContacts
 	}
 
-	c := NewContact()
+	c := newContact()
 	c.ContactPoint = plane.Normal
 	c.ContactPoint.MulWith(distance + s.Radius*-1.0)
 	c.ContactPoint.Add(&positionAxis)
@@ -196,10 +196,8 @@ func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, existingC
 	c.Bodies[0] = s.Body
 	c.Bodies[1] = nil
 
-	// FIXME:
-	// TODO: c.Friction and c.Restitution set here are test constants
-	c.Friction = 0.9
-	c.Restitution = 0.1
+	c.Friction = friction
+	c.Restitution = restitution
 
 	contacts := append(existingContacts, c)
 
@@ -207,13 +205,13 @@ func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, existingC
 }
 
 // CheckAgainstCube checks the sphere against collision with a cube.
-func (s *CollisionSphere) CheckAgainstCube(cube *CollisionCube, existingContacts []*Contact) (bool, []*Contact) {
+func (s *CollisionSphere) CheckAgainstCube(cube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// use the cube's implementation of the check
-	return cube.CheckAgainstSphere(s, existingContacts)
+	return cube.CheckAgainstSphere(s, friction, restitution, existingContacts)
 }
 
 // CheckAgainstSphere checks the sphere against collision with another sphere.
-func (s *CollisionSphere) CheckAgainstSphere(secondSphere *CollisionSphere, existingContacts []*Contact) (bool, []*Contact) {
+func (s *CollisionSphere) CheckAgainstSphere(secondSphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// cache the sphere positions
 	positionOne := s.transform.GetAxis(3)
 	positionTwo := secondSphere.transform.GetAxis(3)
@@ -229,7 +227,7 @@ func (s *CollisionSphere) CheckAgainstSphere(secondSphere *CollisionSphere, exis
 	}
 
 	// we have contact
-	c := NewContact()
+	c := newContact()
 
 	c.ContactPoint = midline
 	c.ContactPoint.MulWith(0.5)
@@ -243,10 +241,8 @@ func (s *CollisionSphere) CheckAgainstSphere(secondSphere *CollisionSphere, exis
 	c.Bodies[0] = s.Body
 	c.Bodies[1] = secondSphere.Body
 
-	// FIXME:
-	// TODO: c.Friction and c.Restitution set here are test constants
-	c.Friction = 0.9
-	c.Restitution = 0.1
+	c.Friction = friction
+	c.Restitution = restitution
 
 	contacts := append(existingContacts, c)
 
@@ -305,7 +301,7 @@ func (cube *CollisionCube) CalculateDerivedData() {
 
 // CheckAgainstHalfSpace does a collision test on a collision box and a plane representing
 // a half-space (i.e. the normal of the plane points out of the half-space).
-func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, existingContacts []*Contact) (bool, []*Contact) {
+func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// check for an intersection -- if there is none, then we can return
 	if !intersectCubeAndHalfSpace(cube, plane) {
 		return false, existingContacts
@@ -339,7 +335,7 @@ func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, existing
 		// compare it to the plane's distance
 		if vertexDistance <= plane.Offset {
 			// we have contact
-			c := NewContact()
+			c := newContact()
 
 			// the contact point is halfway between the vertex and the plane --
 			// we multiply the direction by half the separation distance and
@@ -355,10 +351,8 @@ func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, existing
 			contacts = append(contacts, c)
 			contactDetected = true
 
-			// FIXME:
-			// TODO: c.Friction and c.Restitution set here are test constants
-			c.Friction = 0.9
-			c.Restitution = 0.1
+			c.Friction = friction
+			c.Restitution = restitution
 		}
 	}
 
@@ -366,7 +360,7 @@ func (cube *CollisionCube) CheckAgainstHalfSpace(plane *CollisionPlane, existing
 }
 
 // CheckAgainstSphere checks the cube against a sphere to see if there's a collision.
-func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, existingContacts []*Contact) (bool, []*Contact) {
+func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// transform the center of the sphere into cube coordinates
 	position := sphere.transform.GetAxis(3)
 	relCenter := cube.transform.TransformInverse(&position)
@@ -402,7 +396,7 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, existingC
 	closestPointWorld := cube.transform.MulVector3(&closestPoint)
 
 	// we have contact
-	c := NewContact()
+	c := newContact()
 	c.ContactPoint = closestPointWorld
 	c.ContactNormal = closestPointWorld
 	c.ContactNormal.Sub(&position)
@@ -432,10 +426,8 @@ func (cube *CollisionCube) CheckAgainstSphere(sphere *CollisionSphere, existingC
 
 	contacts := append(existingContacts, c)
 
-	// FIXME:
-	// TODO: c.Friction and c.Restitution set here are test constants
-	c.Friction = 0.9
-	c.Restitution = 0.1
+	c.Friction = friction
+	c.Restitution = restitution
 
 	return true, contacts
 }
@@ -499,7 +491,7 @@ func fillPointFaceBoxBox(one *CollisionCube, two *CollisionCube, toCenter *m.Vec
 		v[2] = -v[2]
 	}
 
-	c := NewContact()
+	c := newContact()
 	c.ContactNormal = normal
 	c.Penetration = pen
 	c.ContactPoint = two.transform.MulVector3(&v)
@@ -573,7 +565,7 @@ func contactPoint(pOne *m.Vector3, dOne *m.Vector3, oneSize m.Real,
 }
 
 // CheckAgainstCube checks for collisions against another cube.
-func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, existingContacts []*Contact) (bool, []*Contact) {
+func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
 	// find the vector between two vectors
 	toCenter := secondCube.transform.GetAxis(3)
 	oneAxis3 := cube.transform.GetAxis(3)
@@ -692,17 +684,15 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, existingC
 			&ptOnTwoEdge, &twoAxis, secondCube.HalfSize[twoAxisIndex], useOne)
 
 		// finally ... create a new contact
-		c := NewContact()
+		c := newContact()
 		c.ContactNormal = axis
 		c.Penetration = pen
 		c.ContactPoint = contactVertex
 		c.Bodies[0] = cube.Body
 		c.Bodies[1] = secondCube.Body
 
-		// FIXME:
-		// TODO: c.Friction and c.Restitution set here are test constants
-		c.Friction = 0.9
-		c.Restitution = 0.1
+		c.Friction = friction
+		c.Restitution = restitution
 
 		contacts := append(existingContacts, c)
 		return true, contacts
@@ -717,28 +707,16 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, existingC
 
 // CheckForCollisions will check one collider primitive against another and update the contact slice
 // if there were any contacts (as well as returning a bool indicating if contacts were found).
-func CheckForCollisions(one Collider, two Collider, existingContacts []*Contact) (bool, []*Contact) {
-	switch two.(type) {
+func CheckForCollisions(one Collider, two Collider, friction, restitution m.Real, existingContacts []*Contact) (bool, []*Contact) {
+	switch t := two.(type) {
 	case *CollisionSphere:
-		otherSphere, ok := two.(*CollisionSphere)
-		if ok {
-			return one.CheckAgainstSphere(otherSphere, existingContacts)
-		}
-		return false, existingContacts
+		return one.CheckAgainstSphere(t, friction, restitution, existingContacts)
 
 	case *CollisionCube:
-		otherCube, ok := two.(*CollisionCube)
-		if ok {
-			return one.CheckAgainstCube(otherCube, existingContacts)
-		}
-		return false, existingContacts
+		return one.CheckAgainstCube(t, friction, restitution, existingContacts)
 
 	case *CollisionPlane:
-		otherPlane, ok := two.(*CollisionPlane)
-		if ok {
-			return one.CheckAgainstHalfSpace(otherPlane, existingContacts)
-		}
-		return false, existingContacts
+		return one.CheckAgainstHalfSpace(t, friction, restitution, existingContacts)
 	}
 
 	// this is reached if we dont have a supported Check* function in the interface

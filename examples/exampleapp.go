@@ -17,10 +17,10 @@ import (
 	"os"
 
 	gl "github.com/go-gl/gl/v3.3-core/gl"
-	glfw "github.com/go-gl/glfw/v3.1/glfw"
+	glfw "github.com/go-gl/glfw/v3.3/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
-	"github.com/harbdog/cubez"
-	m "github.com/harbdog/cubez/math"
+	"github.com/rverpillot/cubez"
+	m "github.com/rverpillot/cubez/math"
 )
 
 var (

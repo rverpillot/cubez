@@ -5,11 +5,11 @@ package main
 
 import (
 	gl "github.com/go-gl/gl/v3.3-core/gl"
-	glfw "github.com/go-gl/glfw/v3.1/glfw"
+	glfw "github.com/go-gl/glfw/v3.3/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
-	"github.com/harbdog/cubez"
-	ex "github.com/harbdog/cubez/examples"
-	m "github.com/harbdog/cubez/math"
+	"github.com/rverpillot/cubez"
+	ex "github.com/rverpillot/cubez/examples"
+	m "github.com/rverpillot/cubez/math"
 )
 
 var (
@@ -52,12 +52,12 @@ func generateContacts(delta float64) (bool, []*cubez.Contact) {
 	groundPlane := cubez.NewCollisionPlane(m.Vector3{0.0, 1.0, 0.0}, 0.0)
 
 	// see if we have a collision with the ground
-	found, contacts := cubez.CheckForCollisions(cube.Collider, groundPlane, nil)
+	found, contacts := cubez.CheckForCollisions(cube.Collider, groundPlane, 0.9, 0.1, nil)
 	if found {
 		returnFound = true
 	}
 	// see if there's a collision against the backboard
-	found, contacts = cubez.CheckForCollisions(cube.Collider, backboard.Collider, contacts)
+	found, contacts = cubez.CheckForCollisions(cube.Collider, backboard.Collider, 0.9, 0.1, contacts)
 	if found {
 		returnFound = true
 	}
@@ -65,19 +65,19 @@ func generateContacts(delta float64) (bool, []*cubez.Contact) {
 	// run collision checks on bullets
 	for _, bullet := range bullets {
 		// check against the ground
-		found, contacts = cubez.CheckForCollisions(bullet.Collider, groundPlane, contacts)
+		found, contacts = cubez.CheckForCollisions(bullet.Collider, groundPlane, 0.9, 0.1, contacts)
 		if found {
 			returnFound = true
 		}
 
 		// check against the cube
-		found, contacts = cubez.CheckForCollisions(cube.Collider, bullet.Collider, contacts)
+		found, contacts = cubez.CheckForCollisions(cube.Collider, bullet.Collider, 0.9, 0.1, contacts)
 		if found {
 			returnFound = true
 		}
 
 		// check against the backboard
-		found, contacts = cubez.CheckForCollisions(backboard.Collider, bullet.Collider, contacts)
+		found, contacts = cubez.CheckForCollisions(backboard.Collider, bullet.Collider, 0.9, 0.1, contacts)
 		if found {
 			returnFound = true
 		}
@@ -87,7 +87,7 @@ func generateContacts(delta float64) (bool, []*cubez.Contact) {
 			if bullet2 == bullet {
 				continue
 			}
-			found, contacts = cubez.CheckForCollisions(bullet2.Collider, bullet.Collider, contacts)
+			found, contacts = cubez.CheckForCollisions(bullet2.Collider, bullet.Collider, 0.9, 0.1, contacts)
 			if found {
 				returnFound = true
 			}

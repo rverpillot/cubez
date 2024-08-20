@@ -5,11 +5,11 @@ package main
 
 import (
 	gl "github.com/go-gl/gl/v3.3-core/gl"
-	glfw "github.com/go-gl/glfw/v3.1/glfw"
+	glfw "github.com/go-gl/glfw/v3.3/glfw"
 	mgl "github.com/go-gl/mathgl/mgl32"
-	"github.com/harbdog/cubez"
-	ex "github.com/harbdog/cubez/examples"
-	m "github.com/harbdog/cubez/math"
+	"github.com/rverpillot/cubez"
+	ex "github.com/rverpillot/cubez/examples"
+	m "github.com/rverpillot/cubez/math"
 )
 
 const (
@@ -47,7 +47,7 @@ func generateContacts(delta float64) (bool, []*cubez.Contact) {
 
 	for _, cube := range cubes {
 		// see if we have a collision with the ground
-		found, contacts = cube.Collider.CheckAgainstHalfSpace(groundPlane, contacts)
+		found, contacts = cube.Collider.CheckAgainstHalfSpace(groundPlane, 0.9, 0.1, contacts)
 		if found == true {
 			returnFound = true
 		}
@@ -57,7 +57,7 @@ func generateContacts(delta float64) (bool, []*cubez.Contact) {
 			if cube == otherCube {
 				continue
 			}
-			found, contacts = cubez.CheckForCollisions(cube.Collider, otherCube.Collider, contacts)
+			found, contacts = cubez.CheckForCollisions(cube.Collider, otherCube.Collider, 0.9, 0.1, contacts)
 			if found == true {
 				returnFound = true
 			}
