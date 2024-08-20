@@ -9,7 +9,7 @@ Cubez is a 3d physics library written in the [Go][golang] programming language. 
 * Full 3d rigid body real-time physics simulation suitable for games; meaning
   both linear velocity as well as angular velocity are calculated.
 * Collision detection between collider primitives.
-* Primitives supported: planes, spheres, cubes.
+* Primitives supported: planes, spheres, boxes.
 * Math library defaults to 64-bit floats but can easily be tuned down to 32-bit.
 
 ## Examples
@@ -18,7 +18,7 @@ Ballistic: shoot spheres at a cube by pressing the space bar.
 
 ![ballistic][ballistic_ss]
 
-Cubedrop: hit the space bar to drop some cubes onto the ground
+Cubedrop: hit the space bar to drop some boxes onto the ground
 
 ![cubedrop][cubedrop_ss]
 
