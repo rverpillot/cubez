@@ -183,7 +183,7 @@ func (s *CollisionSphere) CheckAgainstHalfSpace(plane *CollisionPlane, friction,
 	distance := plane.Normal.Dot(&positionAxis) - s.Radius
 
 	// check for intersection
-	if distance <= plane.Offset == false {
+	if distance > plane.Offset {
 		return false, existingContacts
 	}
 
@@ -579,13 +579,13 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 	// Keep track of the smallest penetration axis.
 	for i := 0; i <= 2; i++ {
 		ret, pen, best = tryAxis(cube, secondCube, cube.transform.GetAxis(i), &toCenter, i, pen, best)
-		if ret == false {
+		if !ret {
 			return false, existingContacts
 		}
 	}
 	for i := 0; i <= 2; i++ {
 		ret, pen, best = tryAxis(cube, secondCube, secondCube.transform.GetAxis(i), &toCenter, i+3, pen, best)
-		if ret == false {
+		if !ret {
 			return false, existingContacts
 		}
 	}
@@ -598,21 +598,21 @@ func (cube *CollisionCube) CheckAgainstCube(secondCube *CollisionCube, friction,
 		a2 := secondCube.transform.GetAxis(0)
 		cross := a1.Cross(&a2)
 		ret, pen, best = tryAxis(cube, secondCube, cross, &toCenter, (i*3)+6, pen, best)
-		if ret == false {
+		if !ret {
 			return false, existingContacts
 		}
 		a1 = cube.transform.GetAxis(i)
 		a2 = secondCube.transform.GetAxis(1)
 		cross = a1.Cross(&a2)
 		ret, pen, best = tryAxis(cube, secondCube, cross, &toCenter, (i*3)+7, pen, best)
-		if ret == false {
+		if !ret {
 			return false, existingContacts
 		}
 		a1 = cube.transform.GetAxis(i)
 		a2 = secondCube.transform.GetAxis(2)
 		cross = a1.Cross(&a2)
 		ret, pen, best = tryAxis(cube, secondCube, cross, &toCenter, (i*3)+8, pen, best)
-		if ret == false {
+		if !ret {
 			return false, existingContacts
 		}
 	}

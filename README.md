@@ -28,6 +28,7 @@ Cubez is known to work on the following:
 
 * Windows 7 x64 with mingw-w64 (see this [tutorial][am_mingw64] if necessary)
 * Linux (Ubuntu 14.04)
+* MacOS (14.X)
 
 At present, I suspect it should work on any Windows or Linux 64-bit system for which
 there is an acceptable Go x64 and gcc x64 compiler set available.
@@ -38,7 +39,7 @@ Support for 32-bit systems is untested.
 
 The only dependency on the core `cubez` package is the math package included in `cubez`.
 
-For the examples, you will need GLFW 3.1.x installed on your system, and you will need
+For the examples, you will need GLFW 3.3.x installed on your system, and you will need
 to install the go-gl project's [gl][gogl_gl], [glfw][gogl_glfw] and [mathgl][gogl_mgl]
 libraries. Your system will also need to be OpenGL 3.3 capable.
 
@@ -70,12 +71,6 @@ go run cubedrop.go
 
 Currently, you'll have to use godoc to read the API documentation and check
 out the examples to figure out how to use the library.
-
-
-## Known Limitations
-
-* slim down the public interface to the library to only export what's needed
-* introduce a way to set the restitution and friction for contacts
 
 
 ## License

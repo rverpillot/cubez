@@ -232,8 +232,7 @@ func prepareContacts(contacts []*Contact, duration m.Real) {
 // constraints using the given number of iterations.
 func adjustPositions(maxIterations int, contacts []*Contact, duration m.Real) {
 	// iteratively resolve interpenetrations in order of severity
-	iterationsUsed := 0
-	for iterationsUsed < maxIterations {
+	for n := 0; n < maxIterations; n++ {
 		// find the biggest penetration
 		max := positionEpsilon
 		index := len(contacts)
@@ -277,9 +276,7 @@ func adjustPositions(maxIterations int, contacts []*Contact, duration m.Real) {
 				}
 			} // b
 		} // i,c
-
-		iterationsUsed++
-	}
+	} // n
 }
 
 // applyPositionChange performs an inertia weighted penetration resolution of this contact alone.
@@ -377,7 +374,7 @@ func (c *Contact) applyPositionChange(penetration m.Real) (linearChange, angular
 		// the changes are reflected in the object's data. otherwise the resolution
 		// will not change the position of the object and the next collision detection
 		// round will have the same penetration.
-		if body.IsAwake == false {
+		if !body.IsAwake {
 			body.CalculateDerivedData()
 		}
 	}
